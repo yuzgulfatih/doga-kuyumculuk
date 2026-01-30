@@ -1,7 +1,7 @@
 // Vercel Serverless Function - API Proxy
 // CORS sorununu çözmek için backend'den API isteği yapıyoruz
 
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
   // OPTIONS isteği için CORS headers döndür
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -51,5 +51,5 @@ export default async function handler(req, res) {
       message: error.message 
     });
   }
-}
+};
 
