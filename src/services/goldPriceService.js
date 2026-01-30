@@ -2,10 +2,10 @@
 // Güneş Kuyumcusu API kullanılıyor
 // https://www.guneskuyumcusu.com.tr/Info/GetProductInfo
 
-// Geliştirme için proxy kullan, production için direkt URL
+// Geliştirme için Vite proxy kullan, production için Vercel serverless function
 const API_URL = import.meta.env.DEV 
   ? '/api/Info/GetProductInfo'
-  : 'https://www.guneskuyumcusu.com.tr/Info/GetProductInfo';
+  : '/api/getPrices';
 
 // ID eşleştirmeleri
 const ID_MAP = {
@@ -36,7 +36,6 @@ export const getAllPrices = async () => {
   try {
     // POST isteği gönder - timestamp ile cache bypass
     const timestamp = Date.now();
-    // Proxy kullanıyorsak mode'u kaldır, değilse cors kullan
     const fetchOptions = {
       method: 'POST',
       headers: {
@@ -46,9 +45,12 @@ export const getAllPrices = async () => {
       body: JSON.stringify({}), // Boş body gönder
     };
     
-    // Sadece production'da mode: 'cors' ekle
-    if (!import.meta.env.DEV) {
-      fetchOptions.mode = 'cors';
+    // Development'ta Vite proxy kullanıyorsak mode'u kaldır
+    if (import.meta.env.DEV) {
+      // Vite proxy kullanılıyor, mode gerekmez
+    } else {
+      // Production'da Vercel serverless function kullanılıyor
+      // CORS sorunu yok çünkü aynı domain'den istek yapılıyor
     }
     
     const response = await fetch(`${API_URL}?_=${timestamp}`, fetchOptions);

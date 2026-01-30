@@ -1,0 +1,14 @@
+{
+  "functions": {
+    "api/getPrices.js": {
+      "runtime": "nodejs20.x"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/getPrices",
+      "destination": "/api/getPrices"
+    }
+  ]
+}
+
