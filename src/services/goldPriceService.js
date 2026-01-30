@@ -2,11 +2,10 @@
 // Güneş Kuyumcusu API kullanılıyor
 // https://www.guneskuyumcusu.com.tr/Info/GetProductInfo
 
-// API URL - Development'ta Vite proxy, production'da CORS proxy
-const BASE_API_URL = 'https://www.guneskuyumcusu.com.tr/Info/GetProductInfo';
+// API URL - Development'ta Vite proxy, production'da Vercel serverless function
 const API_URL = import.meta.env.DEV 
   ? '/api/Info/GetProductInfo'  // Vite proxy
-  : BASE_API_URL;  // Production'da direkt API (CORS proxy ile)
+  : '/api/getPrices';  // Vercel serverless function (CORS proxy)
 
 // ID eşleştirmeleri
 const ID_MAP = {
