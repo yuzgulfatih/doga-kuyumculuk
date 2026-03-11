@@ -16,6 +16,12 @@ const CONTACT = {
 
 const isVideo = (filename) => /\.(mp4|mov|webm|ogg)$/i.test(filename);
 
+// Vercel ve farklı base path'ler için doğru asset URL'si
+const getAssetUrl = (filename) => {
+  const base = (import.meta.env.BASE_URL || '/').replace(/\/?$/, '');
+  return `${base}/assets/${filename}`;
+};
+
 function MediaSlideshow({ mediaList, slideDuration = 10000, startIndex = 0 }) {
   const [index, setIndex] = useState(startIndex % Math.max(1, mediaList.length));
   const videoRef = useRef(null);
@@ -29,12 +35,14 @@ function MediaSlideshow({ mediaList, slideDuration = 10000, startIndex = 0 }) {
 
   const displayIndex = index % mediaList.length;
   const current = mediaList[displayIndex];
-  const src = `/assets/${current}`;
+  const src = getAssetUrl(current);
+
+  const goToNext = () => setIndex((i) => (i + 1) % mediaList.length);
 
   useEffect(() => {
     const v = videoRef.current;
     if (!v || !isVideo(current)) return;
-    v.play().catch(() => {});
+    v.play().catch(goToNext);
   }, [displayIndex, current]);
 
   if (!mediaList.length) return null;
@@ -51,12 +59,16 @@ function MediaSlideshow({ mediaList, slideDuration = 10000, startIndex = 0 }) {
             muted
             loop
             playsInline
+            preload="metadata"
+            onError={goToNext}
           />
         ) : (
           <img
             src={src}
             alt="Doğa Kuyumculuk"
             className="max-w-full max-h-full object-contain"
+            loading="lazy"
+            onError={goToNext}
           />
         )}
       </div>
