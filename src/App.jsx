@@ -51,6 +51,9 @@ function MediaSlideshow({ mediaList, slideDuration = 10000, startIndex = 0 }) {
   useEffect(() => {
     const v = videoRef.current;
     if (!v || !currentIsVideo) return;
+    // Güvenlik için sesi tamamen kapat
+    v.muted = true;
+    v.volume = 0;
     v.play().catch(goToNext);
   }, [displayIndex, current]);
 
