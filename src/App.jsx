@@ -1,7 +1,20 @@
 import { useState, useEffect, useRef } from 'react';
 import { getAllPrices } from './services/goldPriceService';
 import logo from './assets/logo.jpg';
-import galleryMedia from 'virtual:gallery-assets';
+
+// Cloudinary medya galerisi (resim ve video)
+const galleryMedia = [
+  'https://res.cloudinary.com/dixdnau9g/image/upload/v1773235670/IMG_3152_ds6zih.jpg',
+  'https://res.cloudinary.com/dixdnau9g/image/upload/v1773235670/IMG_3154_ybc1gb.jpg',
+  'https://res.cloudinary.com/dixdnau9g/image/upload/v1773235677/IMG_8936_ywxkhn.jpg',
+  'https://res.cloudinary.com/dixdnau9g/video/upload/v1773235676/copy_391065C4-A439-4958-A5B9-B9DD9F443844_zbxnvp.mp4',
+  'https://res.cloudinary.com/dixdnau9g/video/upload/v1773235662/4c9252b3dd224e69af37b4e273b3de97_vdvtlp.mp4',
+  'https://res.cloudinary.com/dixdnau9g/video/upload/v1773235660/be9b896d762547ea8e9e3cef551ac6c3_zjbkh5.mp4',
+  'https://res.cloudinary.com/dixdnau9g/image/upload/v1773235682/IMG_3149_drynnh.jpg',
+  'https://res.cloudinary.com/dixdnau9g/image/upload/v1773235687/IMG_3148_mezvde.jpg',
+  'https://res.cloudinary.com/dixdnau9g/image/upload/v1773235692/IMG_3150_eezy8f.jpg',
+  'https://res.cloudinary.com/dixdnau9g/video/upload/v1773235691/IMG_9309_odxwym.mp4',
+];
 
 const CONTACT = {
   instagram: 'https://instagram.com/dogakuyumculuk63',
@@ -14,34 +27,30 @@ const CONTACT = {
     'https://www.google.com/maps/search/?api=1&query=Do%C4%9Fa+kuyumculuk%2C+Mimar+Sinan%2C+101.+Sk.%2C+63100+Haliliye%2F%C5%9Eanl%C4%B1urfa',
 };
 
-const isVideo = (filename) => /\.(mp4|mov|webm|ogg)$/i.test(filename);
-
-// Vercel ve farklı base path'ler için doğru asset URL'si
-const getAssetUrl = (filename) => {
-  const base = (import.meta.env.BASE_URL || '/').replace(/\/?$/, '');
-  return `${base}/assets/${filename}`;
-};
+const isVideo = (url) => /\.(mp4|mov|webm|ogg)$/i.test(url);
 
 function MediaSlideshow({ mediaList, slideDuration = 10000, startIndex = 0 }) {
   const [index, setIndex] = useState(startIndex % Math.max(1, mediaList.length));
   const videoRef = useRef(null);
 
-  useEffect(() => {
-    const t = setInterval(() => {
-      setIndex((i) => (i + 1) % mediaList.length);
-    }, slideDuration);
-    return () => clearInterval(t);
-  }, [mediaList.length, slideDuration]);
-
   const displayIndex = index % mediaList.length;
   const current = mediaList[displayIndex];
-  const src = getAssetUrl(current);
+  const src = current;
+  const isFirst = displayIndex === 0;
+  const currentIsVideo = isVideo(current);
 
   const goToNext = () => setIndex((i) => (i + 1) % mediaList.length);
 
+  // Resimlerde sabit süre, videolarda video bitene kadar (onEnded ile)
+  useEffect(() => {
+    if (currentIsVideo) return;
+    const t = setInterval(goToNext, slideDuration);
+    return () => clearInterval(t);
+  }, [displayIndex, currentIsVideo, mediaList.length, slideDuration]);
+
   useEffect(() => {
     const v = videoRef.current;
-    if (!v || !isVideo(current)) return;
+    if (!v || !currentIsVideo) return;
     v.play().catch(goToNext);
   }, [displayIndex, current]);
 
@@ -49,28 +58,31 @@ function MediaSlideshow({ mediaList, slideDuration = 10000, startIndex = 0 }) {
 
   return (
     <div className="relative flex-1 min-h-0 w-full rounded-3xl border border-amber-400/70 bg-slate-900/80 shadow-2xl overflow-hidden">
-      {/* Arka plan media */}
+      {/* Arka plan media — geçişte fade efekti */}
       <div className="absolute inset-0 flex items-center justify-center bg-black">
-        {isVideo(current) ? (
-          <video
-            ref={videoRef}
-            src={src}
-            className="max-w-full max-h-full object-contain"
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            onError={goToNext}
-          />
-        ) : (
-          <img
-            src={src}
-            alt="Doğa Kuyumculuk"
-            className="max-w-full max-h-full object-contain"
-            loading="lazy"
-            onError={goToNext}
-          />
-        )}
+        <div key={displayIndex} className="absolute inset-0 flex items-center justify-center slide-fade-in">
+          {currentIsVideo ? (
+            <video
+              ref={videoRef}
+              src={src}
+              className="max-w-full max-h-full object-contain"
+              muted
+              playsInline
+              preload={isFirst ? 'metadata' : 'none'}
+              onEnded={goToNext}
+              onError={goToNext}
+            />
+          ) : (
+            <img
+              src={src}
+              alt="Doğa Kuyumculuk"
+              className="max-w-full max-h-full object-contain"
+              loading={isFirst ? 'eager' : 'lazy'}
+              fetchPriority={isFirst ? 'high' : 'auto'}
+              onError={goToNext}
+            />
+          )}
+        </div>
       </div>
 
       {/* Üstte hafif degrade */}
@@ -380,8 +392,18 @@ function App() {
 
       {/* Footer */}
       <footer className="mt-12 bg-slate-800 text-slate-400 py-5">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center space-y-1">
           <p className="text-sm">© {new Date().getFullYear()} Doğa Kuyumculuk</p>
+          <p className="text-xs font-medium">
+            <a
+              href="https://www.linkedin.com/in/yuzgulfatih"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-slate-300 hover:text-amber-300 transition-colors"
+            >
+              Muhammed Fatih Yüzgül
+            </a>
+          </p>
         </div>
       </footer>
     </div>
