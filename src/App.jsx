@@ -29,6 +29,21 @@ const CONTACT = {
 
 const isVideo = (url) => /\.(mp4|mov|webm|ogg)$/i.test(url);
 
+/** Hesaplayıcıda gösterilecek altın türleri (sıra: HAS, tablo ile aynı) */
+const ALTIN_HESAP_KEYS = [
+  'HAS',
+  '22_ayar_bilezik',
+  'hurda',
+  'yeni_ceyrek',
+  'yeni_yarim',
+  'yeni_ziynet',
+  'eski_ceyrek',
+  'eski_yarim',
+  'eski_ziynet',
+  'cnc',
+  'sarnel',
+];
+
 function MediaSlideshow({ mediaList, slideDuration = 10000, startIndex = 0 }) {
   const [index, setIndex] = useState(startIndex % Math.max(1, mediaList.length));
   const videoRef = useRef(null);
@@ -104,11 +119,97 @@ function MediaSlideshow({ mediaList, slideDuration = 10000, startIndex = 0 }) {
   );
 }
 
+function AltinTutarHesap({ prices, formatNumber, hesapMiktar, setHesapMiktar, hesapTurKey, setHesapTurKey }) {
+  const mevcutKeys = ALTIN_HESAP_KEYS.filter((k) => prices.altin[k]);
+  if (mevcutKeys.length === 0) return null;
+  const turKey = mevcutKeys.includes(hesapTurKey) ? hesapTurKey : mevcutKeys[0];
+  const secilen = turKey ? prices.altin[turKey] : null;
+  const miktar = parseFloat(String(hesapMiktar).replace(',', '.'));
+  const miktarGecerli = Number.isFinite(miktar) && miktar >= 0;
+  const alisToplam = miktarGecerli && secilen ? miktar * secilen.alis : null;
+  const satisToplam = miktarGecerli && secilen ? miktar * secilen.satis : null;
+
+  return (
+    <section className="mb-6 rounded-xl border border-amber-200/80 bg-gradient-to-br from-amber-50/90 to-white p-4 sm:p-5 shadow-sm ring-1 ring-amber-100/60">
+      <h2 className="text-sm font-semibold text-slate-800 mb-3 flex items-center gap-2">
+        <span
+          className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100 text-amber-800 text-lg"
+          aria-hidden
+        >
+          ₺
+        </span>
+        Altın tutarı hesaplama
+      </h2>
+      <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 sm:items-end">
+        <label className="flex flex-col gap-1.5 min-w-[7rem] flex-1 sm:max-w-[11rem]">
+          <span className="text-xs font-medium text-slate-600">Miktar</span>
+          <input
+            type="number"
+            inputMode="decimal"
+            min={0}
+            step="any"
+            value={hesapMiktar}
+            onChange={(e) => setHesapMiktar(e.target.value)}
+            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 tabular-nums shadow-inner focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200/80"
+            placeholder="1"
+            aria-label="Miktar (HAS için gram, ziynet için adet)"
+          />
+        </label>
+        <label className="flex flex-col gap-1.5 flex-1 min-w-0 sm:min-w-[14rem] sm:max-w-md">
+          <span className="text-xs font-medium text-slate-600">Tür</span>
+          <select
+            value={turKey || ''}
+            onChange={(e) => setHesapTurKey(e.target.value)}
+            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200/80 w-full"
+            aria-label="Altın türü"
+          >
+            {mevcutKeys.map((k) => (
+              <option key={k} value={k}>
+                {prices.altin[k].type}
+              </option>
+            ))}
+          </select>
+        </label>
+        <div className="flex-1 min-w-0 sm:min-w-[16rem] rounded-lg border border-slate-200/80 bg-white/80 px-4 py-3 sm:py-2.5">
+          <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500 mb-1.5 sm:mb-1">
+            Tahmini tutar (₺)
+          </p>
+          {!secilen || !miktarGecerli ? (
+            <p className="text-sm text-slate-500">Geçerli bir miktar girin.</p>
+          ) : (
+            <ul className="space-y-1 text-sm text-slate-800">
+              <li className="flex flex-wrap justify-between gap-x-2 gap-y-0.5">
+                <span className="text-slate-600">Kuyumcuya satarken (alış)</span>
+                <span className="font-semibold tabular-nums text-slate-900">
+                  {formatNumber(alisToplam)} ₺
+                </span>
+              </li>
+              <li className="flex flex-wrap justify-between gap-x-2 gap-y-0.5">
+                <span className="text-slate-600">Kuyumcudan alırken (satış)</span>
+                <span className="font-semibold tabular-nums text-amber-900">
+                  {formatNumber(satisToplam)} ₺
+                </span>
+              </li>
+            </ul>
+          )}
+        </div>
+      </div>
+      <p className="mt-3 text-[11px] text-slate-500 leading-relaxed">
+        HAS için miktar <strong className="font-medium text-slate-600">gram</strong>; çeyrek, yarım, bilezik vb. için{' '}
+        <strong className="font-medium text-slate-600">adet</strong> girin. Tutarlar listedeki birim fiyatlarla
+        çarpılır; kesin işlem için mağazayı arayın.
+      </p>
+    </section>
+  );
+}
+
 function App() {
   const [prices, setPrices] = useState(null);
   const [previousPrices, setPreviousPrices] = useState(null);
   const [loading, setLoading] = useState(true);
   const pricesRef = useRef(null);
+  const [hesapMiktar, setHesapMiktar] = useState('1');
+  const [hesapTurKey, setHesapTurKey] = useState('yeni_ceyrek');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -129,8 +230,10 @@ function App() {
   }, []);
 
   const formatNumber = (num) => {
-    if (!num) return '—';
-    return num.toLocaleString('tr-TR', {
+    if (num === null || num === undefined) return '—';
+    const n = Number(num);
+    if (Number.isNaN(n)) return '—';
+    return n.toLocaleString('tr-TR', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
@@ -333,6 +436,15 @@ function App() {
                 value={prices.doviz.EUR ? formatNumber(prices.doviz.EUR.satis) : '—'}
               />
             </section>
+
+            <AltinTutarHesap
+              prices={prices}
+              formatNumber={formatNumber}
+              hesapMiktar={hesapMiktar}
+              setHesapMiktar={setHesapMiktar}
+              hesapTurKey={hesapTurKey}
+              setHesapTurKey={setHesapTurKey}
+            />
 
             {/* Tablo */}
             <section className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
