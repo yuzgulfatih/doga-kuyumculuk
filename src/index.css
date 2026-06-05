@@ -369,32 +369,6 @@
     }
   }
 
-  .site-navbar__nav {
-    display: none;
-    align-items: center;
-    gap: 2rem;
-  }
-
-  @media (min-width: 768px) {
-    .site-navbar__nav {
-      display: flex;
-    }
-  }
-
-  .site-navbar__link {
-    font-size: 0.875rem;
-    font-weight: 500;
-    letter-spacing: 0.01em;
-    color: rgba(232, 213, 163, 0.65);
-    text-decoration: none;
-    transition: color 0.2s;
-    white-space: nowrap;
-  }
-
-  .site-navbar__link:hover {
-    color: #E8D5A3;
-  }
-
   .site-navbar__actions {
     display: flex;
     align-items: center;

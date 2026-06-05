@@ -102,18 +102,6 @@ function Navbar() {
             </div>
           </a>
 
-          <div className="site-navbar__nav">
-            <a href="#fiyatlar" className="site-navbar__link">
-              Fiyatlar
-            </a>
-            <a href="#hesaplama" className="site-navbar__link">
-              Hesaplama
-            </a>
-            <a href={CONTACT.mapsUrl} target="_blank" rel="noopener noreferrer" className="site-navbar__link">
-              Konum
-            </a>
-          </div>
-
           <div className="site-navbar__actions">
             <div className="site-navbar__social">
               <a
