@@ -27,12 +27,12 @@ export default {
         bronze: '#8B7355',
       },
       fontFamily: {
-        display: ['"Cormorant Garamond"', 'Georgia', 'serif'],
-        sans: ['"DM Sans"', 'system-ui', 'sans-serif'],
+        display: ['"Playfair Display"', 'Georgia', 'serif'],
+        sans: ['Inter', 'system-ui', 'sans-serif'],
       },
       letterSpacing: {
-        luxury: '0.22em',
-        wide: '0.14em',
+        luxury: '0.08em',
+        wide: '0.04em',
       },
       boxShadow: {
         gold: '0 4px 24px -4px rgba(201, 169, 98, 0.25)',

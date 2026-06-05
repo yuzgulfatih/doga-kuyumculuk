@@ -336,13 +336,13 @@ function AltinTutarHesap({ prices, formatNumber, hesapMiktar, setHesapMiktar, he
     <section id="hesaplama" className="mb-8 scroll-mt-32 overflow-hidden rounded-sm border border-gold/25 bg-charcoal shadow-gold-lg">
       <div className="border-b border-gold/20 bg-charcoal-light px-5 py-4 sm:px-6">
         <p className="section-subtitle mb-1 text-gold-light/70">Hesaplama</p>
-        <h2 className="font-display text-xl font-medium text-ivory sm:text-2xl">Altın Tutarı Hesaplama</h2>
+        <h2 className="section-heading section-heading--light">Altın Tutarı Hesaplama</h2>
       </div>
 
       <div className="p-5 sm:p-6">
         <div className="flex flex-col gap-5 sm:flex-row sm:flex-wrap sm:items-end">
           <label className="flex min-w-[7rem] flex-1 flex-col gap-2 sm:max-w-[11rem]">
-            <span className="text-xs font-medium uppercase tracking-wide text-gold-light/60">Miktar</span>
+            <span className="text-xs font-medium text-gold-light/60">Miktar</span>
             <input
               type="number"
               inputMode="decimal"
@@ -357,7 +357,7 @@ function AltinTutarHesap({ prices, formatNumber, hesapMiktar, setHesapMiktar, he
           </label>
 
           <label className="flex min-w-0 flex-1 flex-col gap-2 sm:min-w-[14rem] sm:max-w-md">
-            <span className="text-xs font-medium uppercase tracking-wide text-gold-light/60">Tür</span>
+            <span className="text-xs font-medium text-gold-light/60">Tür</span>
             <select
               value={turKey || ''}
               onChange={(e) => setHesapTurKey(e.target.value)}
@@ -373,7 +373,7 @@ function AltinTutarHesap({ prices, formatNumber, hesapMiktar, setHesapMiktar, he
           </label>
 
           <div className="min-w-0 flex-1 rounded-sm border border-gold/20 bg-charcoal-light/60 px-5 py-4 sm:min-w-[16rem]">
-            <p className="mb-3 text-xs font-medium uppercase tracking-wide text-gold-light/50">
+            <p className="mb-3 text-xs font-medium text-gold-light/50">
               Tahmini Tutar
             </p>
             {!secilen || !miktarGecerli ? (
@@ -382,15 +382,15 @@ function AltinTutarHesap({ prices, formatNumber, hesapMiktar, setHesapMiktar, he
               <ul className="space-y-3">
                 <li className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
                   <span className="text-sm text-gold-light/60">Kuyumcuya satarken</span>
-                  <span className="font-display text-xl font-medium tabular-nums text-ivory">
-                    {formatNumber(alisToplam)} <span className="text-sm text-gold">₺</span>
+                  <span className="price-value text-ivory">
+                    {formatNumber(alisToplam)} <span className="text-sm font-medium text-gold">₺</span>
                   </span>
                 </li>
                 <li className="gold-divider" />
                 <li className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
                   <span className="text-sm text-gold-light/60">Kuyumcudan alırken</span>
-                  <span className="font-display text-xl font-medium tabular-nums text-gold-light">
-                    {formatNumber(satisToplam)} <span className="text-sm text-gold">₺</span>
+                  <span className="price-value text-gold-light">
+                    {formatNumber(satisToplam)} <span className="text-sm font-medium text-gold">₺</span>
                   </span>
                 </li>
               </ul>
@@ -412,8 +412,8 @@ function PriceCard({ label, value, featured = false, currency = false }) {
     return (
       <div className="group relative overflow-hidden rounded-sm border border-gold/40 bg-charcoal p-4 text-center shadow-gold transition-all duration-300 hover:border-gold/60 hover:shadow-gold-lg sm:p-5">
         <div className="absolute inset-0 bg-gold-gradient opacity-[0.04] transition-opacity group-hover:opacity-[0.08]" />
-        <p className="relative section-subtitle mb-2 text-[10px] text-gold-light/70">{label}</p>
-        <p className="relative font-display text-2xl font-medium tabular-nums text-gold-light sm:text-3xl">
+        <p className="relative mb-2 text-xs font-medium text-gold-light/70">{label}</p>
+        <p className="relative price-value price-value--featured">
           {value}
         </p>
         <div className="absolute bottom-0 left-1/2 h-px w-12 -translate-x-1/2 bg-gold/50" />
@@ -423,10 +423,10 @@ function PriceCard({ label, value, featured = false, currency = false }) {
 
   return (
     <div className="luxury-card group rounded-sm p-4 text-center transition-all duration-300 hover:border-gold/35 hover:shadow-gold sm:p-5">
-      <p className="section-subtitle mb-2 text-[10px] text-bronze">{label}</p>
-      <p className="font-display text-xl font-medium tabular-nums text-charcoal sm:text-2xl">
+      <p className="mb-2 text-xs font-medium text-bronze">{label}</p>
+      <p className="price-value text-charcoal">
         {value}
-        {currency && <span className="ml-0.5 text-sm text-bronze">₺</span>}
+        {currency && <span className="ml-0.5 text-sm font-medium text-bronze">₺</span>}
       </p>
     </div>
   );
@@ -499,8 +499,8 @@ function App() {
           <div className="h-16 w-16 rounded-full border border-gold/30" />
           <div className="absolute inset-0 h-16 w-16 animate-spin rounded-full border-2 border-transparent border-t-gold" />
         </div>
-        <p className="mt-8 font-display text-lg text-charcoal/70">Fiyatlar yükleniyor</p>
-        <p className="mt-1 text-xs uppercase tracking-luxury text-gold-dark">Doğa Kuyumculuk</p>
+        <p className="mt-8 text-base font-medium text-charcoal/70">Fiyatlar yükleniyor</p>
+        <p className="mt-1 font-display text-sm font-semibold text-gold-dark">Doğa Kuyumculuk</p>
       </div>
     );
   }
@@ -581,23 +581,23 @@ function App() {
               <section className="overflow-hidden rounded-sm border border-gold/20 bg-ivory-warm shadow-luxury">
                 <div className="border-b border-gold/15 px-5 py-4 sm:px-6">
                   <p className="section-subtitle mb-1">Detaylı Liste</p>
-                  <h2 className="font-display text-xl font-medium text-charcoal">Altın Fiyatları</h2>
+                  <h2 className="section-heading">Altın Fiyatları</h2>
                 </div>
 
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-gold/15 bg-ivory-dark/60">
-                        <th className="px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wide text-bronze sm:px-6">
+                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-bronze sm:px-6">
                           Ürün
                         </th>
-                        <th className="px-5 py-3.5 text-right text-[11px] font-semibold uppercase tracking-wide text-bronze sm:px-6">
+                        <th className="px-5 py-3.5 text-right text-xs font-semibold text-bronze sm:px-6">
                           Alış (₺)
                         </th>
-                        <th className="px-5 py-3.5 text-right text-[11px] font-semibold uppercase tracking-wide text-bronze sm:px-6">
+                        <th className="px-5 py-3.5 text-right text-xs font-semibold text-bronze sm:px-6">
                           Satış (₺)
                         </th>
-                        <th className="hidden px-5 py-3.5 text-right text-[11px] font-semibold uppercase tracking-wide text-bronze sm:table-cell sm:px-6">
+                        <th className="hidden px-5 py-3.5 text-right text-xs font-semibold text-bronze sm:table-cell sm:px-6">
                           Güncelleme
                         </th>
                       </tr>
@@ -618,12 +618,12 @@ function App() {
                               <span className="font-medium text-charcoal">{getAltinDisplayName(key, item.type)}</span>
                             </td>
                             <td className="px-5 py-4 text-right sm:px-6">
-                              <span className={`font-display text-base font-medium tabular-nums ${priceChangeClass(change)}`}>
+                              <span className={`price-value price-value--table ${priceChangeClass(change)}`}>
                                 {formatNumber(item.alis)}
                               </span>
                             </td>
                             <td className="px-5 py-4 text-right sm:px-6">
-                              <span className={`font-display text-base font-medium tabular-nums ${priceChangeClass(change)}`}>
+                              <span className={`price-value price-value--table ${priceChangeClass(change)}`}>
                                 {formatNumber(item.satis)}
                               </span>
                             </td>
@@ -653,14 +653,14 @@ function App() {
         <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
           <div className="mb-8 grid gap-8 sm:grid-cols-3">
             <div className="text-center sm:text-left">
-              <h3 className="font-display text-lg font-medium text-ivory">Doğa Kuyumculuk</h3>
+              <h3 className="font-display text-lg font-semibold text-ivory">Doğa Kuyumculuk</h3>
               <p className="mt-2 text-sm leading-relaxed text-gold-light/50">
                 Şanlıurfa'nın güvenilir kuyumcusu. Altın, ziynet ve döviz işlemlerinizde yanınızdayız.
               </p>
             </div>
 
             <div className="text-center">
-              <h3 className="section-subtitle mb-3 text-gold-light/60">İletişim</h3>
+              <h3 className="mb-3 text-sm font-semibold text-gold-light/70">İletişim</h3>
               <div className="space-y-2 text-sm text-gold-light/50">
                 <a href={CONTACT.phoneLink} className="block transition-colors hover:text-gold-light">
                   {CONTACT.phone}
@@ -677,7 +677,7 @@ function App() {
             </div>
 
             <div className="text-center sm:text-right">
-              <h3 className="section-subtitle mb-3 text-gold-light/60">Sosyal Medya</h3>
+              <h3 className="mb-3 text-sm font-semibold text-gold-light/70">Sosyal Medya</h3>
               <div className="flex justify-center gap-3 sm:justify-end">
                 <a
                   href={CONTACT.instagram}
