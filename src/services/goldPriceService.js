@@ -6,6 +6,10 @@ const API_URL = import.meta.env.DEV ? '/api/prices' : '/api/getPrices';
 
 const DOVIZ_URLS = new Set(['USD', 'EUR']);
 
+const ALTIN_TYPE_LABELS = {
+  HAS: '24 Ayar (Has)',
+};
+
 const formatLastUpdate = (lastUpdate) => {
   if (!lastUpdate) return null;
   const parts = lastUpdate.trim().split(/\s+/);
@@ -37,7 +41,7 @@ export const getAllPrices = async () => {
         alis: Number(item.buyPrice) || 0,
         satis: Number(item.sellPrice) || 0,
         time: formatLastUpdate(item.lastUpdate),
-        type: item.type || url,
+        type: ALTIN_TYPE_LABELS[url] || item.type || url,
       };
 
       if (DOVIZ_URLS.has(url)) {
@@ -63,7 +67,7 @@ const getMockPrices = () => {
       EUR: { alis: 51.166, satis: 51.354, time: t(), type: 'EUR' },
     },
     altin: {
-      HAS: { alis: 7457.67, satis: 7489.64, time: t(), type: 'HAS' },
+      HAS: { alis: 7457.67, satis: 7489.64, time: t(), type: '24 Ayar (Has)' },
       '22_ayar_bilezik': { alis: 6797.67, satis: 6927.92, time: t(), type: '22 Ayar Bilezik' },
       hurda: { alis: 6797.67, satis: 6860.51, time: t(), type: '22 Ayar Hurda' },
       yeni_ceyrek: { alis: 12118.71, satis: 12395.35, time: t(), type: 'Yeni Çeyrek' },

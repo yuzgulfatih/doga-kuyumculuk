@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { getAllPrices } from './services/goldPriceService';
 import logo from './assets/logo.jpg';
 
-// Cloudinary medya galerisi (resim ve video)
 const galleryMedia = [
   'https://res.cloudinary.com/dixdnau9g/image/upload/v1773235670/IMG_3152_ds6zih.jpg',
   'https://res.cloudinary.com/dixdnau9g/image/upload/v1773235670/IMG_3154_ybc1gb.jpg',
@@ -29,7 +28,6 @@ const CONTACT = {
 
 const isVideo = (url) => /\.(mp4|mov|webm|ogg)$/i.test(url);
 
-/** Hesaplayıcıda gösterilecek altın türleri (sıra: HAS, tablo ile aynı) */
 const ALTIN_HESAP_KEYS = [
   'HAS',
   '22_ayar_bilezik',
@@ -44,76 +42,281 @@ const ALTIN_HESAP_KEYS = [
   'sarnel',
 ];
 
-function MediaSlideshow({ mediaList, slideDuration = 10000, startIndex = 0 }) {
+const ALTIN_DISPLAY_NAMES = {
+  HAS: '24 Ayar (Has)',
+};
+
+const getAltinDisplayName = (key, fallback) => ALTIN_DISPLAY_NAMES[key] || fallback;
+
+const TABLE_KEYS = [
+  'HAS',
+  '22_ayar_bilezik',
+  'hurda',
+  'yeni_ceyrek',
+  'yeni_yarim',
+  'yeni_ziynet',
+  'eski_ceyrek',
+  'eski_yarim',
+  'eski_ziynet',
+  'cnc',
+  'sarnel',
+];
+
+function OrnamentDivider({ className = '' }) {
+  return (
+    <div className={`flex items-center gap-4 ${className}`} aria-hidden>
+      <div className="gold-divider flex-1" />
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-gold shrink-0">
+        <path d="M8 0L9.5 6.5L16 8L9.5 9.5L8 16L6.5 9.5L0 8L6.5 6.5L8 0Z" fill="currentColor" opacity="0.6" />
+      </svg>
+      <div className="gold-divider flex-1" />
+    </div>
+  );
+}
+
+function LiveIndicator() {
+  return (
+    <span className="live-badge">
+      <span className="live-badge__dot">
+        <span className="live-badge__ping" />
+        <span className="live-badge__core" />
+      </span>
+      Canlı
+    </span>
+  );
+}
+
+function Navbar() {
+  return (
+    <>
+      <nav className="site-navbar" aria-label="Ana menü">
+        <div className="site-navbar__inner">
+          <a href="#" className="site-navbar__brand">
+            <div className="site-navbar__logo-wrap">
+              <div className="site-navbar__logo-glow" aria-hidden />
+              <img src={logo} alt="" className="site-navbar__logo" />
+            </div>
+            <div className="min-w-0">
+              <span className="site-navbar__title">Doğa Kuyumculuk</span>
+              <span className="site-navbar__tagline">Altın & Döviz Fiyatları</span>
+            </div>
+          </a>
+
+          <div className="site-navbar__nav">
+            <a href="#fiyatlar" className="site-navbar__link">
+              Fiyatlar
+            </a>
+            <a href="#hesaplama" className="site-navbar__link">
+              Hesaplama
+            </a>
+            <a href={CONTACT.mapsUrl} target="_blank" rel="noopener noreferrer" className="site-navbar__link">
+              Konum
+            </a>
+          </div>
+
+          <div className="site-navbar__actions">
+            <div className="site-navbar__social">
+              <a
+                href={CONTACT.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="site-navbar__social-link"
+                aria-label="Instagram"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                </svg>
+              </a>
+              <a
+                href={CONTACT.tiktok}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="site-navbar__social-link"
+                aria-label="TikTok"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                  <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
+                </svg>
+              </a>
+            </div>
+
+            <a href={CONTACT.phoneLink} className="btn-gold-filled site-navbar__phone" aria-label={`Telefon: ${CONTACT.phone}`}>
+              <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <span className="site-navbar__phone-text">{CONTACT.phone}</span>
+            </a>
+          </div>
+        </div>
+
+        <div className="site-navbar__sub">
+          <a
+            href={CONTACT.mapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="site-navbar__address"
+            aria-label="Adres - haritada aç"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" strokeLinecap="round" strokeLinejoin="round" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+            <span>
+              {CONTACT.addressLine1}, {CONTACT.addressLine2}
+            </span>
+          </a>
+        </div>
+      </nav>
+
+      <div className="site-disclaimer">
+        <div className="site-disclaimer__inner">
+          Fiyatlar bilgilendirme amaçlıdır. Güncel fiyatlar için mağazamızı ziyaret ediniz.
+        </div>
+      </div>
+    </>
+  );
+}
+
+function CollectionGallery({ mediaList, slideDuration = 10000, startIndex = 0 }) {
   const [index, setIndex] = useState(startIndex % Math.max(1, mediaList.length));
+  const [progress, setProgress] = useState(0);
   const videoRef = useRef(null);
 
   const displayIndex = index % mediaList.length;
   const current = mediaList[displayIndex];
-  const src = current;
   const isFirst = displayIndex === 0;
   const currentIsVideo = isVideo(current);
 
   const goToNext = () => setIndex((i) => (i + 1) % mediaList.length);
+  const goToPrev = () => setIndex((i) => (i - 1 + mediaList.length) % mediaList.length);
+  const goToSlide = (i) => setIndex(i);
 
-  // Resimlerde sabit süre, videolarda video bitene kadar (onEnded ile)
   useEffect(() => {
+    setProgress(0);
     if (currentIsVideo) return;
-    const t = setInterval(goToNext, slideDuration);
-    return () => clearInterval(t);
+
+    const start = performance.now();
+    let frame;
+
+    const tick = (now) => {
+      const elapsed = now - start;
+      setProgress(Math.min((elapsed / slideDuration) * 100, 100));
+      if (elapsed < slideDuration) {
+        frame = requestAnimationFrame(tick);
+      }
+    };
+
+    frame = requestAnimationFrame(tick);
+    const t = setTimeout(goToNext, slideDuration);
+    return () => {
+      cancelAnimationFrame(frame);
+      clearTimeout(t);
+    };
   }, [displayIndex, currentIsVideo, mediaList.length, slideDuration]);
 
   useEffect(() => {
     const v = videoRef.current;
     if (!v || !currentIsVideo) return;
-    // Güvenlik için sesi tamamen kapat
     v.muted = true;
     v.volume = 0;
+
+    const onTimeUpdate = () => {
+      if (v.duration) setProgress((v.currentTime / v.duration) * 100);
+    };
+
+    v.addEventListener('timeupdate', onTimeUpdate);
     v.play().catch(goToNext);
+    return () => v.removeEventListener('timeupdate', onTimeUpdate);
   }, [displayIndex, current]);
 
   if (!mediaList.length) return null;
 
   return (
-    <div className="relative flex-1 min-h-0 w-full rounded-3xl border border-amber-400/70 bg-slate-900/80 shadow-2xl overflow-hidden">
-      {/* Arka plan media — geçişte fade efekti */}
-      <div className="absolute inset-0 flex items-center justify-center bg-black">
-        <div key={displayIndex} className="absolute inset-0 flex items-center justify-center slide-fade-in">
-          {currentIsVideo ? (
-            <video
-              ref={videoRef}
-              src={src}
-              className="max-w-full max-h-full object-contain"
-              muted
-              playsInline
-              preload={isFirst ? 'metadata' : 'none'}
-              onEnded={goToNext}
-              onError={goToNext}
-            />
-          ) : (
-            <img
-              src={src}
-              alt="Doğa Kuyumculuk"
-              className="max-w-full max-h-full object-contain"
-              loading={isFirst ? 'eager' : 'lazy'}
-              fetchPriority={isFirst ? 'high' : 'auto'}
-              onError={goToNext}
-            />
-          )}
+    <div className="collection-panel">
+      <div className="collection-panel__header">
+        <div className="collection-panel__header-text">
+          <span className="collection-panel__eyebrow">Galeri</span>
+          <span className="collection-panel__title">Koleksiyonumuz</span>
         </div>
+        <span className="collection-panel__counter">
+          {String(displayIndex + 1).padStart(2, '0')} / {String(mediaList.length).padStart(2, '0')}
+        </span>
       </div>
 
-      {/* Üstte hafif degrade */}
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-900/40 via-slate-900/10 to-slate-900/60" />
+      <div className="collection-frame">
+        <div className="collection-frame__corner collection-frame__corner--tl" aria-hidden />
+        <div className="collection-frame__corner collection-frame__corner--tr" aria-hidden />
+        <div className="collection-frame__corner collection-frame__corner--bl" aria-hidden />
+        <div className="collection-frame__corner collection-frame__corner--br" aria-hidden />
 
-      {/* İç çerçeve efekti */}
-      <div className="absolute inset-[6px] rounded-2xl border border-amber-200/20 pointer-events-none" />
+        <div className="collection-slideshow">
+          <div className="collection-slideshow__progress" aria-hidden>
+            <div className="collection-slideshow__progress-bar" style={{ width: `${progress}%` }} />
+          </div>
 
-      {/* Alt etiket */}
-      <div className="absolute inset-x-4 bottom-4 flex items-center justify-between text-[11px] text-amber-50">
-        <span className="uppercase tracking-[0.18em] text-amber-200/90 font-medium bg-slate-900/40 px-3 py-1 rounded-full border border-amber-300/60">
-          Doğa Kuyumculuk
-        </span>
+          <div className="collection-slideshow__media">
+            <div key={displayIndex} className="collection-slideshow__slide slide-fade-in">
+              {currentIsVideo ? (
+                <video
+                  ref={videoRef}
+                  src={current}
+                  className="collection-slideshow__asset"
+                  muted
+                  playsInline
+                  preload={isFirst ? 'metadata' : 'none'}
+                  onEnded={goToNext}
+                  onError={goToNext}
+                />
+              ) : (
+                <img
+                  src={current}
+                  alt="Doğa Kuyumculuk koleksiyonu"
+                  className="collection-slideshow__asset"
+                  loading={isFirst ? 'eager' : 'lazy'}
+                  fetchPriority={isFirst ? 'high' : 'auto'}
+                  onError={goToNext}
+                />
+              )}
+            </div>
+          </div>
+
+          <div className="collection-slideshow__overlay" aria-hidden />
+
+          <button
+            type="button"
+            className="collection-slideshow__nav collection-slideshow__nav--prev"
+            onClick={goToPrev}
+            aria-label="Önceki görsel"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+              <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            className="collection-slideshow__nav collection-slideshow__nav--next"
+            onClick={goToNext}
+            aria-label="Sonraki görsel"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+              <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        </div>
+
+        <div className="collection-dots" role="tablist" aria-label="Galeri görselleri">
+          {mediaList.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              role="tab"
+              aria-selected={i === displayIndex}
+              aria-label={`Görsel ${i + 1}`}
+              className={`collection-dots__dot ${i === displayIndex ? 'collection-dots__dot--active' : ''}`}
+              onClick={() => goToSlide(i)}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -130,76 +333,102 @@ function AltinTutarHesap({ prices, formatNumber, hesapMiktar, setHesapMiktar, he
   const satisToplam = miktarGecerli && secilen ? miktar * secilen.satis : null;
 
   return (
-    <section className="mb-6 rounded-xl border border-amber-200/80 bg-gradient-to-br from-amber-50/90 to-white p-4 sm:p-5 shadow-sm ring-1 ring-amber-100/60">
-      <h2 className="text-sm font-semibold text-slate-800 mb-3 flex items-center gap-2">
-        <span
-          className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100 text-amber-800 text-lg"
-          aria-hidden
-        >
-          ₺
-        </span>
-        Altın tutarı hesaplama
-      </h2>
-      <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 sm:items-end">
-        <label className="flex flex-col gap-1.5 min-w-[7rem] flex-1 sm:max-w-[11rem]">
-          <span className="text-xs font-medium text-slate-600">Miktar</span>
-          <input
-            type="number"
-            inputMode="decimal"
-            min={0}
-            step="any"
-            value={hesapMiktar}
-            onChange={(e) => setHesapMiktar(e.target.value)}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 tabular-nums shadow-inner focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200/80"
-            placeholder="1"
-            aria-label="Miktar (HAS için gram, ziynet için adet)"
-          />
-        </label>
-        <label className="flex flex-col gap-1.5 flex-1 min-w-0 sm:min-w-[14rem] sm:max-w-md">
-          <span className="text-xs font-medium text-slate-600">Tür</span>
-          <select
-            value={turKey || ''}
-            onChange={(e) => setHesapTurKey(e.target.value)}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200/80 w-full"
-            aria-label="Altın türü"
-          >
-            {mevcutKeys.map((k) => (
-              <option key={k} value={k}>
-                {prices.altin[k].type}
-              </option>
-            ))}
-          </select>
-        </label>
-        <div className="flex-1 min-w-0 sm:min-w-[16rem] rounded-lg border border-slate-200/80 bg-white/80 px-4 py-3 sm:py-2.5">
-          <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500 mb-1.5 sm:mb-1">
-            Tahmini tutar (₺)
-          </p>
-          {!secilen || !miktarGecerli ? (
-            <p className="text-sm text-slate-500">Geçerli bir miktar girin.</p>
-          ) : (
-            <ul className="space-y-1 text-sm text-slate-800">
-              <li className="flex flex-wrap justify-between gap-x-2 gap-y-0.5">
-                <span className="text-slate-600">Kuyumcuya satarken (alış)</span>
-                <span className="font-semibold tabular-nums text-slate-900">
-                  {formatNumber(alisToplam)} ₺
-                </span>
-              </li>
-              <li className="flex flex-wrap justify-between gap-x-2 gap-y-0.5">
-                <span className="text-slate-600">Kuyumcudan alırken (satış)</span>
-                <span className="font-semibold tabular-nums text-amber-900">
-                  {formatNumber(satisToplam)} ₺
-                </span>
-              </li>
-            </ul>
-          )}
-        </div>
+    <section id="hesaplama" className="mb-8 scroll-mt-32 overflow-hidden rounded-sm border border-gold/25 bg-charcoal shadow-gold-lg">
+      <div className="border-b border-gold/20 bg-charcoal-light px-5 py-4 sm:px-6">
+        <p className="section-subtitle mb-1 text-gold-light/70">Hesaplama</p>
+        <h2 className="font-display text-xl font-medium text-ivory sm:text-2xl">Altın Tutarı Hesaplama</h2>
       </div>
-      <p className="mt-3 text-[11px] text-slate-500 leading-relaxed">
-        HAS için miktar <strong className="font-medium text-slate-600">gram</strong>; çeyrek, yarım, bilezik vb. için{' '}
-        <strong className="font-medium text-slate-600">adet</strong> girin. Tutarlar listedeki birim fiyatlarla
-        çarpılır; kesin işlem için mağazayı arayın.
-      </p>
+
+      <div className="p-5 sm:p-6">
+        <div className="flex flex-col gap-5 sm:flex-row sm:flex-wrap sm:items-end">
+          <label className="flex min-w-[7rem] flex-1 flex-col gap-2 sm:max-w-[11rem]">
+            <span className="text-xs font-medium uppercase tracking-wide text-gold-light/60">Miktar</span>
+            <input
+              type="number"
+              inputMode="decimal"
+              min={0}
+              step="any"
+              value={hesapMiktar}
+              onChange={(e) => setHesapMiktar(e.target.value)}
+              className="luxury-input border-gold/20 bg-charcoal-light text-ivory focus:border-gold focus:ring-gold/20"
+              placeholder="1"
+              aria-label="Miktar (HAS için gram, ziynet için adet)"
+            />
+          </label>
+
+          <label className="flex min-w-0 flex-1 flex-col gap-2 sm:min-w-[14rem] sm:max-w-md">
+            <span className="text-xs font-medium uppercase tracking-wide text-gold-light/60">Tür</span>
+            <select
+              value={turKey || ''}
+              onChange={(e) => setHesapTurKey(e.target.value)}
+              className="luxury-select border-gold/20 bg-charcoal-light text-ivory focus:border-gold focus:ring-gold/20"
+              aria-label="Altın türü"
+            >
+              {mevcutKeys.map((k) => (
+                <option key={k} value={k} className="bg-charcoal text-ivory">
+                  {getAltinDisplayName(k, prices.altin[k].type)}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <div className="min-w-0 flex-1 rounded-sm border border-gold/20 bg-charcoal-light/60 px-5 py-4 sm:min-w-[16rem]">
+            <p className="mb-3 text-xs font-medium uppercase tracking-wide text-gold-light/50">
+              Tahmini Tutar
+            </p>
+            {!secilen || !miktarGecerli ? (
+              <p className="text-sm text-gold-light/40">Geçerli bir miktar girin.</p>
+            ) : (
+              <ul className="space-y-3">
+                <li className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                  <span className="text-sm text-gold-light/60">Kuyumcuya satarken</span>
+                  <span className="font-display text-xl font-medium tabular-nums text-ivory">
+                    {formatNumber(alisToplam)} <span className="text-sm text-gold">₺</span>
+                  </span>
+                </li>
+                <li className="gold-divider" />
+                <li className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                  <span className="text-sm text-gold-light/60">Kuyumcudan alırken</span>
+                  <span className="font-display text-xl font-medium tabular-nums text-gold-light">
+                    {formatNumber(satisToplam)} <span className="text-sm text-gold">₺</span>
+                  </span>
+                </li>
+              </ul>
+            )}
+          </div>
+        </div>
+
+        <p className="mt-5 text-xs leading-relaxed text-gold-light/40">
+          HAS için miktar <strong className="font-medium text-gold-light/60">gram</strong>; çeyrek, yarım, bilezik vb. için{' '}
+          <strong className="font-medium text-gold-light/60">adet</strong> girin. Kesin işlem için mağazamızı arayın.
+        </p>
+      </div>
     </section>
+  );
+}
+
+function PriceCard({ label, value, featured = false, currency = false }) {
+  if (featured) {
+    return (
+      <div className="group relative overflow-hidden rounded-sm border border-gold/40 bg-charcoal p-4 text-center shadow-gold transition-all duration-300 hover:border-gold/60 hover:shadow-gold-lg sm:p-5">
+        <div className="absolute inset-0 bg-gold-gradient opacity-[0.04] transition-opacity group-hover:opacity-[0.08]" />
+        <p className="relative section-subtitle mb-2 text-[10px] text-gold-light/70">{label}</p>
+        <p className="relative font-display text-2xl font-medium tabular-nums text-gold-light sm:text-3xl">
+          {value}
+        </p>
+        <div className="absolute bottom-0 left-1/2 h-px w-12 -translate-x-1/2 bg-gold/50" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="luxury-card group rounded-sm p-4 text-center transition-all duration-300 hover:border-gold/35 hover:shadow-gold sm:p-5">
+      <p className="section-subtitle mb-2 text-[10px] text-bronze">{label}</p>
+      <p className="font-display text-xl font-medium tabular-nums text-charcoal sm:text-2xl">
+        {value}
+        {currency && <span className="ml-0.5 text-sm text-bronze">₺</span>}
+      </p>
+    </div>
   );
 }
 
@@ -247,13 +476,6 @@ function App() {
     return `${h}:${m}:${s}`;
   };
 
-  const formatDate = (date) => {
-    if (!date) return '';
-    const d = String(date.getDate()).padStart(2, '0');
-    const m = String(date.getMonth() + 1).padStart(2, '0');
-    return `${d}.${m}.${date.getFullYear()}`;
-  };
-
   const getPriceChange = (currentPrice, previousPrice) => {
     if (!previousPrice?.alis || !currentPrice?.alis) return null;
     const cur = parseFloat(currentPrice.alis);
@@ -264,292 +486,238 @@ function App() {
     return null;
   };
 
-  const PriceCard = ({ label, value, accent = false }) => (
-    <div
-      className={`rounded-xl border bg-white p-4 sm:p-5 text-center shadow-sm transition-shadow hover:shadow-md ${
-        accent ? 'border-amber-200 ring-1 ring-amber-100' : 'border-slate-200'
-      }`}
-    >
-      <p className="text-xs font-medium uppercase tracking-wider text-slate-500 mb-1">{label}</p>
-      <p className="text-xl sm:text-2xl font-semibold tabular-nums text-slate-900">{value}</p>
-    </div>
-  );
+  const priceChangeClass = (change) => {
+    if (change === 'up') return 'text-emerald-500';
+    if (change === 'down') return 'text-red-400';
+    return 'text-charcoal';
+  };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center">
-        <div className="w-10 h-10 border-2 border-slate-300 border-t-amber-500 rounded-full animate-spin" />
-        <p className="mt-4 text-slate-500 text-sm font-medium">Fiyatlar yükleniyor...</p>
+      <div className="flex min-h-screen flex-col items-center justify-center bg-ivory bg-ivory-texture">
+        <div className="relative">
+          <div className="h-16 w-16 rounded-full border border-gold/30" />
+          <div className="absolute inset-0 h-16 w-16 animate-spin rounded-full border-2 border-transparent border-t-gold" />
+        </div>
+        <p className="mt-8 font-display text-lg text-charcoal/70">Fiyatlar yükleniyor</p>
+        <p className="mt-1 text-xs uppercase tracking-luxury text-gold-dark">Doğa Kuyumculuk</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      {/* Header */}
-      <header className="bg-slate-900 text-white border-b border-slate-800 shadow-lg sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-5">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6">
-            {/* Logo + marka */}
-            <div className="flex items-center justify-center sm:justify-start gap-3 sm:gap-4 text-center sm:text-left">
-              <img
-                src={logo}
-                alt="Doğa Kuyumculuk"
-                className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover ring-2 ring-amber-400/70 shadow-md"
-              />
-              <div className="flex flex-col">
-                <h1 className="text-xl sm:text-2xl font-semibold tracking-tight leading-tight">
-                  Doğa Kuyumculuk
-                </h1>
-                <p className="text-[11px] sm:text-xs text-amber-200/80 font-medium uppercase tracking-[0.18em]">
-                  Altın & Döviz Fiyatları
-                </p>
-              </div>
-            </div>
+    <div className="flex min-h-screen flex-col bg-ivory bg-ivory-texture">
+      <Navbar />
 
-            {/* Sağ blok: buton + sosyal + adres */}
-            <div className="flex flex-col items-stretch sm:items-end gap-2 w-full sm:w-auto">
-              {/* Telefon butonu – mobilde geniş */}
-              <a
-                href={CONTACT.phoneLink}
-                className="inline-flex justify-center items-center gap-1.5 rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-emerald-500/40 hover:bg-emerald-400 active:bg-emerald-600 transition-colors w-full sm:w-auto"
-                aria-label={`Telefon: ${CONTACT.phone}`}
-              >
-                <svg
-                  className="w-4 h-4 flex-shrink-0"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden
-                >
-                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                </svg>
-                <span>{CONTACT.phone}</span>
-              </a>
-
-              {/* Sosyal linkler */}
-              <div className="flex items-center justify-center sm:justify-end gap-3 text-xs sm:text-sm text-slate-300">
-                <a
-                  href={CONTACT.instagram}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 hover:text-white transition-colors"
-                  aria-label="Instagram"
-                >
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
-                  </svg>
-                  <span>Instagram</span>
-                </a>
-                <span className="h-3 w-px bg-slate-600/70" />
-                <a
-                  href={CONTACT.tiktok}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 hover:text-white transition-colors"
-                  aria-label="TikTok"
-                >
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
-                  </svg>
-                  <span>TikTok</span>
-                </a>
+      {/* Main */}
+      <main className="page-main">
+        <div className="page-main__content">
+          {prices && (
+            <>
+              {/* Section header */}
+              <div id="fiyatlar" className="section-hero mb-6 animate-slide-up sm:mb-8 scroll-mt-32">
+                <p className="section-subtitle">Güncel Kurlar</p>
+                <h2 className="section-title">Bugünün Fiyatları</h2>
+                <div className="section-hero__live">
+                  <LiveIndicator />
+                </div>
+                {prices.timestamp && (
+                  <p className="section-hero__updated">
+                    Son güncelleme: {formatTime(prices.timestamp)}
+                  </p>
+                )}
               </div>
 
-              <a
-                href={CONTACT.mapsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs text-slate-300 hover:text-white transition-colors max-w-full sm:max-w-md"
-                aria-label="Adres - haritada aç"
-              >
-                <svg
-                  className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden
-                >
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                  <circle cx="12" cy="10" r="3" />
-                </svg>
-                <span className="truncate">
-                  {CONTACT.addressLine1}, {CONTACT.addressLine2}
-                </span>
-              </a>
-            </div>
-          </div>
-        </div>
-      </header>
+              <OrnamentDivider className="mb-6 sm:mb-8" />
 
-      {/* Uyarı */}
-      <div className="bg-slate-100 border-b border-slate-200">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-2">
-          <p className="text-center text-slate-600 text-sm">
-            Fiyatlar bilgilendirme amaçlıdır. Güncel fiyatlar için mağazamızı ziyaret ediniz.
-          </p>
-        </div>
-      </div>
+              {/* Featured prices */}
+              <section className="price-highlight mb-8">
+                <div className="price-highlight__has grid grid-cols-2 gap-3 sm:gap-4">
+                <PriceCard
+                  featured
+                  label="HAS Alış"
+                  value={prices.altin.HAS ? formatNumber(prices.altin.HAS.alis) : '—'}
+                />
+                <PriceCard
+                  featured
+                  label="HAS Satış"
+                  value={prices.altin.HAS ? formatNumber(prices.altin.HAS.satis) : '—'}
+                />
+                </div>
+                <div className="price-highlight__fx grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+                <PriceCard
+                  label="USD Alış"
+                  value={prices.doviz.USD ? formatNumber(prices.doviz.USD.alis) : '—'}
+                  currency
+                />
+                <PriceCard
+                  label="USD Satış"
+                  value={prices.doviz.USD ? formatNumber(prices.doviz.USD.satis) : '—'}
+                  currency
+                />
+                <PriceCard
+                  label="EUR Alış"
+                  value={prices.doviz.EUR ? formatNumber(prices.doviz.EUR.alis) : '—'}
+                  currency
+                />
+                <PriceCard
+                  label="EUR Satış"
+                  value={prices.doviz.EUR ? formatNumber(prices.doviz.EUR.satis) : '—'}
+                  currency
+                />
+                </div>
+              </section>
 
-      {/* Ana içerik: sol galeri (sola yaslı) | merkez | sağ galeri (sağa yaslı) */}
-      <main className="flex w-full max-w-[100vw] px-0 gap-0 py-4 sm:py-8 flex-1">
-        <aside className="hidden lg:flex flex-shrink-0 w-64 xl:w-80 2xl:w-96 pl-2 xl:pl-4 flex flex-col items-stretch self-stretch min-h-0">
-          <div className="flex-1 min-h-0 flex flex-col">
-            <MediaSlideshow mediaList={galleryMedia} slideDuration={10000} startIndex={0} />
-          </div>
-        </aside>
-        <div className="flex-1 min-w-0 max-w-5xl mx-auto px-4 sm:px-6">
-      {prices && (
-          <>
-            {/* Öne çıkan fiyatlar */}
-            <section className="grid grid-cols-2 sm:grid-cols-6 gap-3 sm:gap-4 mb-6">
-              <PriceCard
-                accent
-                label="HAS Alış"
-                value={prices.altin.HAS ? formatNumber(prices.altin.HAS.alis) : '—'}
+              <AltinTutarHesap
+                prices={prices}
+                formatNumber={formatNumber}
+                hesapMiktar={hesapMiktar}
+                setHesapMiktar={setHesapMiktar}
+                hesapTurKey={hesapTurKey}
+                setHesapTurKey={setHesapTurKey}
               />
-              <PriceCard
-                accent
-                label="HAS Satış"
-                value={prices.altin.HAS ? formatNumber(prices.altin.HAS.satis) : '—'}
-              />
-              <PriceCard
-                label="USD Alış"
-                value={prices.doviz.USD ? formatNumber(prices.doviz.USD.alis) : '—'}
-              />
-              <PriceCard
-                label="USD Satış"
-                value={prices.doviz.USD ? formatNumber(prices.doviz.USD.satis) : '—'}
-              />
-              <PriceCard
-                label="EUR Alış"
-                value={prices.doviz.EUR ? formatNumber(prices.doviz.EUR.alis) : '—'}
-              />
-              <PriceCard
-                label="EUR Satış"
-                value={prices.doviz.EUR ? formatNumber(prices.doviz.EUR.satis) : '—'}
-              />
-            </section>
 
-            <AltinTutarHesap
-              prices={prices}
-              formatNumber={formatNumber}
-              hesapMiktar={hesapMiktar}
-              setHesapMiktar={setHesapMiktar}
-              hesapTurKey={hesapTurKey}
-              setHesapTurKey={setHesapTurKey}
-            />
+              {/* Price table */}
+              <section className="overflow-hidden rounded-sm border border-gold/20 bg-ivory-warm shadow-luxury">
+                <div className="border-b border-gold/15 px-5 py-4 sm:px-6">
+                  <p className="section-subtitle mb-1">Detaylı Liste</p>
+                  <h2 className="font-display text-xl font-medium text-charcoal">Altın Fiyatları</h2>
+                </div>
 
-            {/* Tablo */}
-            <section className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-slate-800 text-white">
-                      <th className="px-4 sm:px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider">
-                        Ürün
-                      </th>
-                      <th className="px-4 sm:px-6 py-3.5 text-right text-xs font-semibold uppercase tracking-wider">
-                        Alış (₺)
-                      </th>
-                      <th className="px-4 sm:px-6 py-3.5 text-right text-xs font-semibold uppercase tracking-wider">
-                        Satış (₺)
-                      </th>
-                      <th className="px-4 sm:px-6 py-3.5 text-right text-xs font-semibold uppercase tracking-wider hidden sm:table-cell">
-                        Son güncelleme
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {['22_ayar_bilezik', 'hurda', 'yeni_ceyrek', 'yeni_yarim', 'yeni_ziynet', 'eski_ceyrek', 'eski_yarim', 'eski_ziynet', 'cnc', 'sarnel'].map(
-                      (key) => {
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-gold/15 bg-ivory-dark/60">
+                        <th className="px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wide text-bronze sm:px-6">
+                          Ürün
+                        </th>
+                        <th className="px-5 py-3.5 text-right text-[11px] font-semibold uppercase tracking-wide text-bronze sm:px-6">
+                          Alış (₺)
+                        </th>
+                        <th className="px-5 py-3.5 text-right text-[11px] font-semibold uppercase tracking-wide text-bronze sm:px-6">
+                          Satış (₺)
+                        </th>
+                        <th className="hidden px-5 py-3.5 text-right text-[11px] font-semibold uppercase tracking-wide text-bronze sm:table-cell sm:px-6">
+                          Güncelleme
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {TABLE_KEYS.map((key, idx) => {
                         const item = prices.altin[key];
                         if (!item) return null;
                         const change = getPriceChange(item, previousPrices?.altin?.[key]);
                         return (
                           <tr
                             key={key}
-                            className="hover:bg-slate-50/80 transition-colors"
+                            className={`border-b border-gold/8 transition-colors hover:bg-champagne/30 ${
+                              idx % 2 === 0 ? 'bg-transparent' : 'bg-ivory-dark/30'
+                            }`}
                           >
-                            <td className="px-4 sm:px-6 py-3.5">
-                              <span className="font-medium text-slate-800">{item.type}</span>
+                            <td className="px-5 py-4 sm:px-6">
+                              <span className="font-medium text-charcoal">{getAltinDisplayName(key, item.type)}</span>
                             </td>
-                            <td className="px-4 sm:px-6 py-3.5 text-right">
-                              <span
-                                className={`tabular-nums font-medium ${
-                                  change === 'up'
-                                    ? 'text-emerald-600'
-                                    : change === 'down'
-                                    ? 'text-red-600'
-                                    : 'text-slate-900'
-                                }`}
-                              >
+                            <td className="px-5 py-4 text-right sm:px-6">
+                              <span className={`font-display text-base font-medium tabular-nums ${priceChangeClass(change)}`}>
                                 {formatNumber(item.alis)}
                               </span>
                             </td>
-                            <td className="px-4 sm:px-6 py-3.5 text-right">
-                              <span
-                                className={`tabular-nums font-medium ${
-                                  change === 'up'
-                                    ? 'text-emerald-600'
-                                    : change === 'down'
-                                    ? 'text-red-600'
-                                    : 'text-slate-900'
-                                }`}
-                              >
+                            <td className="px-5 py-4 text-right sm:px-6">
+                              <span className={`font-display text-base font-medium tabular-nums ${priceChangeClass(change)}`}>
                                 {formatNumber(item.satis)}
                               </span>
                             </td>
-                            <td className="px-4 sm:px-6 py-3.5 text-right text-slate-500 text-sm hidden sm:table-cell">
+                            <td className="hidden px-5 py-4 text-right text-xs text-bronze sm:table-cell sm:px-6">
                               {item.time || formatTime(prices.timestamp)}
                             </td>
                           </tr>
                         );
-                      }
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </section>
-
-            {/* Mobil: tablonun altında galeri (lg ve üzerinde gizli) */}
-            {galleryMedia.length > 0 && (
-              <section className="lg:hidden mt-6 px-0">
-                <div className="rounded-2xl overflow-hidden border border-amber-300/60 bg-slate-900 shadow-xl aspect-[3/4] max-h-[70vh] w-full mx-auto flex flex-col min-h-0">
-                  <MediaSlideshow mediaList={galleryMedia} slideDuration={10000} startIndex={0} />
+                      })}
+                    </tbody>
+                  </table>
                 </div>
               </section>
-            )}
-          </>
-        )}
+
+              {galleryMedia.length > 0 && (
+                <section className="page-collection">
+                  <CollectionGallery mediaList={galleryMedia} slideDuration={10000} startIndex={0} />
+                </section>
+              )}
+            </>
+          )}
         </div>
-        <aside className="hidden lg:flex flex-shrink-0 w-64 xl:w-80 2xl:w-96 pr-2 xl:pr-4 flex flex-col items-stretch self-stretch min-h-0">
-          <div className="flex-1 min-h-0 flex flex-col">
-            <MediaSlideshow mediaList={galleryMedia} slideDuration={10000} startIndex={Math.floor(galleryMedia.length / 2)} />
-          </div>
-        </aside>
       </main>
 
       {/* Footer */}
-      <footer className="mt-12 bg-slate-800 text-slate-400 py-5">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center space-y-1">
-          <p className="text-sm">© {new Date().getFullYear()} Doğa Kuyumculuk</p>
-          <p className="text-xs font-medium">
-            <a
-              href="https://www.linkedin.com/in/yuzgulfatih"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-slate-300 hover:text-amber-300 transition-colors"
-            >
-              Muhammed Fatih Yüzgül
-            </a>
-          </p>
+      <footer className="mt-auto border-t border-gold/20 bg-charcoal">
+        <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+          <div className="mb-8 grid gap-8 sm:grid-cols-3">
+            <div className="text-center sm:text-left">
+              <h3 className="font-display text-lg font-medium text-ivory">Doğa Kuyumculuk</h3>
+              <p className="mt-2 text-sm leading-relaxed text-gold-light/50">
+                Şanlıurfa'nın güvenilir kuyumcusu. Altın, ziynet ve döviz işlemlerinizde yanınızdayız.
+              </p>
+            </div>
+
+            <div className="text-center">
+              <h3 className="section-subtitle mb-3 text-gold-light/60">İletişim</h3>
+              <div className="space-y-2 text-sm text-gold-light/50">
+                <a href={CONTACT.phoneLink} className="block transition-colors hover:text-gold-light">
+                  {CONTACT.phone}
+                </a>
+                <a
+                  href={CONTACT.mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block transition-colors hover:text-gold-light"
+                >
+                  Haliliye, Şanlıurfa
+                </a>
+              </div>
+            </div>
+
+            <div className="text-center sm:text-right">
+              <h3 className="section-subtitle mb-3 text-gold-light/60">Sosyal Medya</h3>
+              <div className="flex justify-center gap-3 sm:justify-end">
+                <a
+                  href={CONTACT.instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-gold px-4 py-2 text-xs"
+                  aria-label="Instagram"
+                >
+                  Instagram
+                </a>
+                <a
+                  href={CONTACT.tiktok}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-gold px-4 py-2 text-xs"
+                  aria-label="TikTok"
+                >
+                  TikTok
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <OrnamentDivider className="mb-6" />
+
+          <div className="text-center space-y-1">
+            <p className="text-xs text-gold-light/30">
+              © {new Date().getFullYear()} Doğa Kuyumculuk. Tüm hakları saklıdır.
+            </p>
+            <p className="text-[11px] text-gold-light/20">
+              <a
+                href="https://www.linkedin.com/in/yuzgulfatih"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-colors hover:text-gold-light/50"
+              >
+                Muhammed Fatih Yüzgül
+              </a>
+            </p>
+          </div>
         </div>
       </footer>
     </div>
