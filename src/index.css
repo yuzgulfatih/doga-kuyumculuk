@@ -435,7 +435,7 @@
     display: none;
   }
 
-  @media (min-width: 400px) {
+  @media (min-width: 640px) {
     .site-navbar__phone-text {
       display: inline;
     }
