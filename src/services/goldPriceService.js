@@ -2,7 +2,7 @@
 // Sukob Fiyat API: https://sukobfiyat.com/api/prices
 // Fiyatlar yaklaşık 30 saniyede bir güncellenir
 
-const API_URL = import.meta.env.DEV ? '/api/prices' : '/api/getPrices';
+const API_URL = '/api/prices';
 
 const DOVIZ_URLS = new Set(['USD', 'EUR']);
 
@@ -19,7 +19,7 @@ const formatLastUpdate = (lastUpdate) => {
 
 export const getAllPrices = async () => {
   try {
-    const response = await fetch(`${API_URL}?_=${Date.now()}`, {
+    const response = await fetch(API_URL, {
       method: 'GET',
       headers: { Accept: 'application/json' },
       mode: 'cors',
