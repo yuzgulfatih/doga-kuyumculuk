@@ -66,6 +66,7 @@ export default defineConfig({
         target: 'https://sukobfiyat.com',
         changeOrigin: true,
         secure: true,
+        rewrite: () => `/api/pricess/?cache=${Date.now()}`,
         configure: (proxy) => {
           proxy.on('error', (err) => console.log('proxy error', err));
         },

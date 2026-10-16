@@ -1,5 +1,6 @@
 // Altın ve Döviz fiyat servisi
-// Sukob Fiyat API: https://sukobfiyat.com/api/prices
+// Sukob Fiyat API: https://sukobfiyat.com/api/pricess/
+// (Not: /api/prices farklı bir set; ekrandaki rakamlar /api/pricess)
 // Fiyatlar yaklaşık 30 saniyede bir güncellenir
 
 const API_URL = '/api/prices';

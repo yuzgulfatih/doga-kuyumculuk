@@ -17,14 +17,19 @@ export default async function handler(req, res) {
   }
 
   try {
-    const response = await fetch('https://sukobfiyat.com/api/prices', {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'User-Agent': 'Mozilla/5.0',
-      },
-      cache: 'no-store',
-    });
+    // Not: /api/prices ile /api/pricess farklı fiyat setleri döndürür.
+    // Sukob ekranındaki rakamlar /api/pricess kaynağından gelir.
+    const response = await fetch(
+      `https://sukobfiyat.com/api/pricess/?cache=${Date.now()}`,
+      {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+          'User-Agent': 'Mozilla/5.0',
+        },
+        cache: 'no-store',
+      }
+    );
 
     const contentType = response.headers.get('content-type') || '';
     const body = await response.text();
