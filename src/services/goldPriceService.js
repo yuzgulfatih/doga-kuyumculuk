@@ -24,12 +24,16 @@ export const getAllPrices = async () => {
       headers: { Accept: 'application/json' },
       mode: 'cors',
       credentials: 'omit',
+      cache: 'no-store',
     });
 
     if (!response.ok) throw new Error(`API hatası: ${response.status}`);
 
     const data = await response.json();
-    if (!Array.isArray(data) || data.length === 0) throw new Error('API boş veri döndü');
+    // Bazen cache/proxy hata JSON'u döndürebilir; fiyat dizisi değilse hata say
+    if (!Array.isArray(data) || data.length === 0) {
+      throw new Error(data?.error || 'API boş veri döndü');
+    }
 
     const prices = { doviz: {}, altin: {}, timestamp: new Date() };
 

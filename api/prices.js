@@ -48,7 +48,12 @@ export default async function handler(req, res) {
     const data = JSON.parse(body);
 
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=60');
+    // Tarayıcıda 304 + boş body yüzünden fiyatların kaybolmasını engelle;
+    // CDN tarafında kısa süre cache tut (s-maxage).
+    res.setHeader(
+      'Cache-Control',
+      'public, max-age=0, s-maxage=15, stale-while-revalidate=30, must-revalidate'
+    );
 
     return res.status(200).json(data);
   } catch (error) {
